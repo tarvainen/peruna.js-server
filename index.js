@@ -1,4 +1,5 @@
 var fs = require('fs');
+var domparser = require('./domparser');
 
 exports = module.exports = (function () {
 	
@@ -20,6 +21,8 @@ exports = module.exports = (function () {
 					if (err) {
 						return res.send(err);
 					} else {
+						var dom = domparser.parse(data);
+						console.log(dom);
 						return res.send(that.escape(data.toString()));
 					}
 				});
