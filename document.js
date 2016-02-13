@@ -1,6 +1,7 @@
 exports = module.exports = (function () {
 	
-	function Document () {
+	function Document (html) {
+		this.html = html;
 		this.elements = [];
 	}
 
@@ -11,6 +12,12 @@ exports = module.exports = (function () {
 		}
 
 		return result;
+	}
+
+	Document.prototype.getElementById = function (id) {
+		var matches = this.html.match(/<\w* id="kissa">([^<*]*)<\/\w*>/);
+		console.log(matches);
+		return matches;
 	}
 
 	return Document;

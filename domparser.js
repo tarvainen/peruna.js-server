@@ -7,13 +7,9 @@ exports = module.exports = (function () {
 	}
 
 	DomParser.prototype.parse = function (html) {
-
-		var document = new Document();
-
-		var e = new Element();
-		e.nodeName = 'p';
-		document.elements.push(e);
-		return document.toString();
+		var document = new Document(html);
+		document.getElementById('kissa');
+		return document;
 	}
 
 	return new DomParser();
