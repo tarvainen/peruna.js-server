@@ -12,8 +12,8 @@ exports = module.exports = (function () {
 	}
 
 	Peruna.prototype.render = function (path) {
-
 		var that = this;
+
 		return function (req, res, next) {
 			res.render = function (filename, opts) {
 				fs.readFile(Array(__dirname, that.__path, filename).join('/'), 'utf-8', function (err, data) {
@@ -33,27 +33,21 @@ exports = module.exports = (function () {
 	Peruna.prototype.parse = function (html, opts) {
 		opts = opts || {};
 
-		html = this.initBinds(html, opts);
-
-		console.log(html);
 		var blocks = html.match(/<peruna[^]*>[^]*<\/peruna>/g);
 
-
 		for (var i = 0; i < blocks.length; i++) {
-			var attrs = blocks[i].match(/(\w*[\s\S]="[^]*")/g);
-
+			var attrs = blocks[i].match(/\w*[\s\S]=["'][\s\S][^"]*["']/g);
 
 			for (var j = 0; j < attrs.length; j++) {
-				attrs[j] = attrs[j].replace(/["']/g, '');
-
-				console.log(attrs[j]);
-				var cmd = attrs[j].split(/=/)[0];
-				var toeval = attrs[j].split(/=/)[1];
+				
+				attrs[j] = attrs[j].replace(/"/g, '');
+				var cmd = attrs[j].split(/\b=/)[0];
+				var toeval = attrs[j].split(/\b=/)[1];
 
 				switch (cmd) {
 					case 'hide':
 						var hide;
-						console.log(toeval);
+
 						if (toeval == 'true' || toeval == 'false') {
 							hide = eval(toeval);
 						} else {
@@ -63,20 +57,53 @@ exports = module.exports = (function () {
 						html = hide ? html.replace(blocks[i], '') : html;
 						break;
 
+					case 'loop':
+						toeval = toeval.replace(/["']/g, '');
+						if (!toeval.match(/\w* in \w*/)) {
+							break;
+						}
+
+						var varName = toeval.split(' in ')[0];
+						var objName = toeval.split(' in ')[1];
+
+						var obj = eval('opts.' + objName);
+						if (!obj) {
+							break;
+						}
+
+						var result = '';
+						var elements = blocks[i].replace(/<peruna[^>]*>/, '');
+						elements = elements.replace('</peruna>', '');
+
+
+						for (var n = 0; n < obj.length; n++) {
+							var params = {};
+							params[varName] = obj[n];
+							var val = this.initBinds(elements, params);
+							result += val;
+						}				
+
+						html = html.replace(blocks[i], result);		
+
+						break;
+
 				}
 			}
 
 		}
 
+		html = this.initBinds(html, opts);
+
+
 		return html;
 	}
 
 	Peruna.prototype.initBinds = function (html, opts) {
-		var matches = html.match(/{{\s\w*\s}}/g);
+		var matches = html.match(/{{[^}}]*}}/g);
 
 		for (var i = 0; i < matches.length; i++) {
-
-			var val = matches[i].replace(/{/g, '').replace(/}/g, '').replace(/\s/g, '');
+			var val = matches[i].replace(/[{}\s]/g, '');
+			console.log(val);
 
 			html = html.replace(matches[i], eval('opts.' + val));
 		}
