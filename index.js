@@ -59,7 +59,8 @@ exports = module.exports = (function () {
 
 	Peruna.prototype.controller = function (controller, callback) {
 		this.controllers[controller] = new PerunaController();
-		callback(this.controllers[controller].scope);
+		callback.call(this.controllers[controller], this.controllers[controller].scope);
+		this.controllers[controller].emit('create');
 	}
 
 	Peruna.prototype.parse = function (html, req, callback) {
@@ -76,18 +77,39 @@ exports = module.exports = (function () {
 			}
 
 			var controller = ctrls[1];
-
 			var cName = controller.replace(/['"]/g, '').split('=')[1];
-			that.controllers[cName] = that.controllers[cName] || {};
+			controller = that.controllers[cName] || {};
 
-			opts = that.controllers[cName].scope || opts;
+			that.initControllerEvents(controller);
+
+			if (req.body) {
+				controller.emit(req.method.toLowerCase(), req.body);
+				controller.emit('data', req.body);
+			}
+
+			opts = controller.scope || opts;
 			opts.request = req;
 
 			html = that.initEmptyBlocks(html, opts);
 			html = that.removeEmptyBlocks(html);
 			html = that.initAllBlocks(html, opts);
 			html = that.initAllBinds(html, opts);
+			controller.emit('ready');
 			callback(html);
+		});
+	}
+
+	Peruna.prototype.initControllerEvents = function (controller) {
+		controller.on('data', function (data) {
+			data = data || {};
+
+			var scope = controller.scope;
+			if (data.onsubmit && typeof scope[data.onsubmit] == 'function') {
+				var submitFunc = data.onsubmit;
+				delete data.onsubmit;
+				scope[submitFunc].call(controller, data);
+			}
+
 		});
 	}
 
@@ -123,7 +145,7 @@ exports = module.exports = (function () {
 				break;
 			case 'submit':
 				return nf.create('input', {
-					type: 'submit',
+					type: 'text',
 					name: 'onsubmit',
 					hidden: true,
 					value: toEval
