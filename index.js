@@ -1,6 +1,7 @@
 var fs = require('fs');
 var PerunaController = require('./peruna-controller.js');
 var nf = require('./node-factory.js');
+var urlParser = require('./url-parser.js');
 
 exports = module.exports = (function () {
 	
@@ -18,6 +19,8 @@ exports = module.exports = (function () {
 
 		return function (req, res, next) {
 			res.render = function (filename, opts) {
+				urlParser.parse(req, res, next);
+				
 				var fp = Array(__dirname, that.__path, filename).join('/');
 				fs.readFile(fp, 'utf-8', function (err, data) {
 					if (err) {
