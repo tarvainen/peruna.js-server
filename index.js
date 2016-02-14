@@ -1,5 +1,6 @@
 var fs = require('fs');
 var PerunaController = require('./peruna-controller.js');
+var nf = require('./node-factory.js');
 
 exports = module.exports = (function () {
 	
@@ -75,6 +76,7 @@ exports = module.exports = (function () {
 			}
 
 			var controller = ctrls[1];
+			html = that.initEmptyBlocks(html, opts);
 			html = that.removeEmptyBlocks(html);
 
 			var cName = controller.replace(/['"]/g, '').split('=')[1];
@@ -86,6 +88,47 @@ exports = module.exports = (function () {
 			html = that.initAllBinds(html, opts);
 			callback(html);
 		});
+	}
+
+	Peruna.prototype.initEmptyBlocks = function (html, opts) {
+			var emptyBlocks = html.match(/<peruna[^>]*\/>/g);
+
+			for (var i in emptyBlocks) {
+				html = this.initSingleEmptyBlock(html, opts, emptyBlocks[i]);
+			}
+
+			return html;
+	}
+
+	Peruna.prototype.initSingleEmptyBlock = function (html, opts, block) {
+		var attrs = block.match(/\w*[\s\S]=["'][\s\S][^"]*["']/g);
+		var result = '';
+
+		for (var i in attrs) {
+			result += this.initDirectiveAttribute(attrs[i]);
+		}
+
+		return html.replace(block, result);
+	}
+
+	Peruna.prototype.initDirectiveAttribute = function (attr) {
+		attr = attr.replace(/['"]/g, '');
+
+		var cmd = attr.split(/\b=/)[0];
+		var toEval = attr.split(/\b=/)[1];
+
+		switch (cmd) {
+			case 'include':
+				break;
+			case 'submit':
+				return nf.create('input', {
+					type: 'submit',
+					name: 'onsubmit',
+					hidden: true,
+					value: toEval
+				}, true);
+				break;
+		}
 	}
 
 	Peruna.prototype.removeEmptyBlocks = function (html) {
@@ -151,7 +194,7 @@ exports = module.exports = (function () {
 							result += val;
 						}
 					}
-					
+
 					html = html.replace(block, result);		
 					break;
 			}
