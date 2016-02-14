@@ -18,15 +18,13 @@ exports = module.exports = (function () {
 		var that = this;
 
 		return function (req, res, next) {
-			res.render = function (filename, opts) {
-				urlParser.parse(req, res, next);
-				
+			res.render = function (filename) {
 				var fp = Array(__dirname, that.__path, filename).join('/');
 				fs.readFile(fp, 'utf-8', function (err, data) {
 					if (err) {
 						return res.send(err);
 					} else {
-						var html = that.parse(data, opts, function (html) {
+						var html = that.parse(data, req, function (html) {
 							return res.send(html);
 						});
 					}
@@ -52,7 +50,7 @@ exports = module.exports = (function () {
 
 			for (var i in files) {
 				var data = fs.readFileSync(fp + '/' + files[i], 'utf-8');
-				eval(data);		
+				eval(data);
 			}
 
 			callback();
@@ -64,10 +62,9 @@ exports = module.exports = (function () {
 		callback(this.controllers[controller].scope);
 	}
 
-	Peruna.prototype.parse = function (html, opts, callback) {
+	Peruna.prototype.parse = function (html, req, callback) {
 		var that = this;
 		this.initControllers(function () {
-			opts = opts || {};
 			html = that.removeComments(html);
 
 			// find the used controller
@@ -79,14 +76,15 @@ exports = module.exports = (function () {
 			}
 
 			var controller = ctrls[1];
-			html = that.initEmptyBlocks(html, opts);
-			html = that.removeEmptyBlocks(html);
 
 			var cName = controller.replace(/['"]/g, '').split('=')[1];
 			that.controllers[cName] = that.controllers[cName] || {};
 
 			opts = that.controllers[cName].scope || opts;
+			opts.request = req;
 
+			html = that.initEmptyBlocks(html, opts);
+			html = that.removeEmptyBlocks(html);
 			html = that.initAllBlocks(html, opts);
 			html = that.initAllBinds(html, opts);
 			callback(html);
