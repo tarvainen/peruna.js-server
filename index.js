@@ -8,6 +8,13 @@ exports = module.exports = (function () {
 	function Peruna () {
 		this.__path = '';
 		this.controllers = {};
+		this.debug = false;
+	}
+
+	Peruna.prototype.log = function (data) {
+		if (this.debug) {
+			console.log(data);
+		}
 	}
 
 	Peruna.prototype.path = function (path) {
@@ -40,6 +47,7 @@ exports = module.exports = (function () {
 	}
 
 	Peruna.prototype.initControllers = function (callback) {
+		this.log('Initializing controllers.');
 		var peruna = this;
 		var fp = Array(__dirname, this.controllersPath).join('/');
 
@@ -58,12 +66,14 @@ exports = module.exports = (function () {
 	}
 
 	Peruna.prototype.controller = function (controller, callback) {
+		this.log('Call to create controller ' + controller);
 		this.controllers[controller] = new PerunaController();
 		callback.call(this.controllers[controller], this.controllers[controller].scope);
 		this.controllers[controller].emit('create');
 	}
 
 	Peruna.prototype.parse = function (html, req, callback) {
+		this.log('Parsing html.');
 		var that = this;
 		this.initControllers(function () {
 			html = that.removeComments(html);
@@ -100,6 +110,7 @@ exports = module.exports = (function () {
 	}
 
 	Peruna.prototype.initControllerEvents = function (controller) {
+		this.log('Initializing controller events.');
 		controller.on('data', function (data) {
 			data = data || {};
 
@@ -142,6 +153,8 @@ exports = module.exports = (function () {
 
 		switch (cmd) {
 			case 'include':
+				var fp = Array(__dirname, that.__path, filename).join('/');
+				fs.readFileSync()
 				break;
 			case 'submit':
 				return nf.create('input', {
