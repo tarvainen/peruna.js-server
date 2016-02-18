@@ -24,7 +24,7 @@ exports = module.exports = (function () {
 		fs.readFile(fp, 'utf-8', function (err, data) {
 			if (err) {
 				console.log(err);
-				that.emit('ready', err);
+				that.emit('error', err);
 			} else {
 				that.html = data;
 
