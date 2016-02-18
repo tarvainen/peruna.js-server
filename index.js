@@ -8,13 +8,18 @@ exports = module.exports = (function () {
 	function Peruna () {
 		this.__path = '';
 		this.controllers = {};
-		this.debug = false;
+		this.debug = true;
 	}
 
-	Peruna.prototype.log = function (data) {
+	Peruna.prototype.log = function (data, err) {
 		if (this.debug) {
-			console.log(data);
+			console.log('[peruna]' + data);
 		}
+	}
+
+	Peruna.prototype.err = function (data) {
+		console.log('\x1b[31m', '[peruna]' + data);
+		console.log('\x1b[30m');
 	}
 
 	Peruna.prototype.path = function (path) {
@@ -81,10 +86,12 @@ exports = module.exports = (function () {
 			// find the used controller
 			var regex = /<peruna.*?(?=controller=)(.*?(?=["'])['"].*?(?=['"])["'])/;
 			var ctrls = html.match(regex);
+			that.log(ctrls);
 			
 			if (!ctrls) {
 				return callback(html);
 			}
+
 
 			var controller = ctrls[1];
 			var cName = controller.replace(/['"]/g, '').split('=')[1];
@@ -153,8 +160,7 @@ exports = module.exports = (function () {
 
 		switch (cmd) {
 			case 'include':
-				var fp = Array(__dirname, that.__path, filename).join('/');
-				fs.readFileSync()
+				return this.includeFile(toEval);
 				break;
 			case 'submit':
 				return nf.create('input', {
@@ -164,6 +170,19 @@ exports = module.exports = (function () {
 					value: toEval
 				}, true);
 				break;
+			default:
+				return '';
+		}
+	}
+
+	Peruna.prototype.includeFile = function (filename) {
+		filename = filename || '';
+		var fp = Array(__dirname, this.__path, filename).join('/');
+		try {
+			return fs.readFileSync(fp);
+		} catch (e) {
+			this.err('Unable to read file ' + fp);
+			return '';
 		}
 	}
 
