@@ -94,10 +94,11 @@ exports = module.exports = (function () {
 
 			that.initEmptyBlocks();
 			that.removeEmptyBlocks();
+			that.initHtmlBlocks();
 			that.initAllBlocks();
 			that.html = that.initAllBinds(that.html, that.opts);
-			that.initHtmlBlocks();
 			controller.emit('ready');
+			that.removeNewlines();
 			callback();
 		});
 	}
@@ -307,6 +308,10 @@ exports = module.exports = (function () {
 
 	PerunaTemplate.prototype.removeComments = function () {
 		this.html = this.html.replace(/<!--[^]*?(?=\-->)-->/g, '');
+	}
+
+	PerunaTemplate.prototype.removeNewlines = function () {
+		this.html = this.html.replace(/(^|)\n(\n)\2+/g, '');
 	}
 
 	PerunaTemplate.prototype.escape = function (str) {
