@@ -22,4 +22,5 @@ exports = module.exports = (function () {
 	}
 
 	return new Keksi();
+	
 }).call(this);

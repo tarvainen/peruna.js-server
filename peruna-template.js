@@ -96,6 +96,7 @@ exports = module.exports = (function () {
 			that.removeEmptyBlocks();
 			that.initAllBlocks();
 			that.html = that.initAllBinds(that.html, that.opts);
+			that.initHtmlBlocks();
 			controller.emit('ready');
 			callback();
 		});
@@ -235,6 +236,35 @@ exports = module.exports = (function () {
 					}
 
 					this.html = this.html.replace(block, result);		
+					break;
+			}
+		}
+	}
+
+	PerunaTemplate.prototype.initHtmlBlocks = function () {
+		var matches = this.html.match(/<(?!%)[^>]*>/g);
+
+		for (var i = 0; i < matches.length; i++) {
+			this.initSingleHtmlBlock(matches[i]);
+		}
+	}
+
+	PerunaTemplate.prototype.initSingleHtmlBlock = function (block) {
+		var attrs = block.match(/.*?(?=\=)*=["'][\s\S][^"]*["']/g) || [];
+		var name = (block.match(/name=['"](.*?(?=["']))/) || '')[1];
+		var value = (block.match(/value=['"](.*?(?=["']))/) || '')[1];
+		for (var i = 0; i < attrs.length; i++) {
+			var attr = attrs[i].replace(/["'\s()]/g, '').split('=');
+			switch (attr[0]) {
+				case 'p-click-server':
+					if (this.opts.request.body[name]) {
+						if (typeof this.opts[attr[1]] == 'function') {
+							this.opts[attr[1]].call({
+								name: name,
+								value: value
+							});
+						}
+					}
 					break;
 			}
 		}
