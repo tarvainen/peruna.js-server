@@ -28,7 +28,6 @@ exports = module.exports = (function () {
 
 	Peruna.prototype.render = function (path) {
 		var that = this;
-
 		return function (req, res, next) {
 			res.render = function (filename) {
 				var fp = Array(__dirname, that.__path, filename).join('/');
@@ -84,7 +83,7 @@ exports = module.exports = (function () {
 			html = that.removeComments(html);
 
 			// find the used controller
-			var regex = /<peruna.*?(?=controller=)(.*?(?=["'])['"].*?(?=['"])["'])/;
+			var regex = /<%.*?(?=controller=)(.*?(?=["'])['"].*?(?=['"])["'])/;
 			var ctrls = html.match(regex);
 			that.log(ctrls);
 			
@@ -104,8 +103,9 @@ exports = module.exports = (function () {
 				controller.emit('data', req.body);
 			}
 
-			opts = controller.scope || opts;
+			var opts = controller.scope || opts;
 			opts.request = req;
+
 
 			html = that.initEmptyBlocks(html, opts);
 			html = that.removeEmptyBlocks(html);
@@ -132,10 +132,13 @@ exports = module.exports = (function () {
 	}
 
 	Peruna.prototype.initEmptyBlocks = function (html, opts) {
-			var emptyBlocks = html.match(/<peruna[^>]*\/>/g);
+			var emptyBlocks = html.match(/<%[^>]*\%>/g);
 
 			for (var i in emptyBlocks) {
-				html = this.initSingleEmptyBlock(html, opts, emptyBlocks[i]);
+				console.log(emptyBlocks[i]);
+				var newBlock = this.initAllBinds(emptyBlocks[i], opts);
+				html = html.replace(emptyBlocks[i], newBlock);
+				html = this.initSingleEmptyBlock(html, opts, newBlock);
 			}
 
 			return html;
@@ -187,11 +190,11 @@ exports = module.exports = (function () {
 	}
 
 	Peruna.prototype.removeEmptyBlocks = function (html) {
-		return html.replace(/<peruna[^>]*?(?=\/>)\/>/g, '');
+		return html.replace(/<%[^>]*?(?=\/>)\/>/g, '');
 	}
 
 	Peruna.prototype.initAllBlocks = function (html, opts) {
-		var blocks = html.match(/<peruna[^]*?(?=<\/peruna>)<\/peruna>/g);
+		var blocks = html.match(/<%[^]*?(?=<\/%>)<\/%>/g);
 
 		if (!blocks) {
 			return html;
@@ -225,7 +228,7 @@ exports = module.exports = (function () {
 				case 'loop':
 					toEval = toEval.replace(/["']/g, '');
 					var result = '';
-					var elements = block.replace(/(<|<\/)peruna[^>]*>/g, '');
+					var elements = block.replace(/(<|<\/)%[^>]*>/g, '');
 
 					if (!toEval.match(/\w* in \w*/)) {
 						var times = -1;
@@ -260,7 +263,7 @@ exports = module.exports = (function () {
 
 	Peruna.prototype.hasBlockToBeHidden = function (param, opts) {
 		if (param == 'true' || param == 'false') {
-			return eval(param);
+			return param == 'true';
 		} else {
 			try {
 				return opts[param];
@@ -278,7 +281,16 @@ exports = module.exports = (function () {
 
 		for (var i = 0; i < matches.length; i++) {
 			var val = matches[i].replace(/[\[\]\s]/g, '');
-			html = html.replace(matches[i], eval('opts.' + val));
+			var elems = val.split('.');
+			if (elems && elems.length > 0) {
+				for (var j in elems) {
+					elems[j] = '["' + elems[j] + '"]';
+				}
+
+				val = elems.join('');
+				console.log(eval('opts' + val));
+				html = html.replace(matches[i], eval('opts' + val) || '');
+			}
 		}
 
 		return html;
