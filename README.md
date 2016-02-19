@@ -26,63 +26,54 @@ Download files to your project node_modules and require files in your server.js.
 
 ## Usage
 Add peruna controller as the very first element in to your html file.
-    <peruna controller="mainController" />
 
-    <html>
-      <head>
-        <title>[[ title ]]</title>
-      </head>
+    <!-- Add the controller as the very first thing on your template file. -->
+    <% controller="mainController" %>
     
-      <body>
-        
-        // use object or array to loop
-        <peruna loop="value in vals">
-        	<p>[[ value ]]</p>
-        </peruna>
-        
-        // just use value for loop
-        <peruna loop="4">
-        	<p>The index value is [[ index ]]</p>
-        </peruna>
-      
-        <p>GET params: [[ request.body.text ]]</p>
-      
-        <form method="GET">
-          // function to call on server
-        	<peruna submit="handleData"/>
-        	<input type="text" name="text" value="[[ request.body.text || '']]"/>
-        	<input type="submit" value="Send!"/>
-        </form>
-      
-      </body>
+    <!DOCTYPE html>
+    
+    <html>
+    
+    <head>
+    	<title>[[ title ]]</title>
+    	<link rel="stylesheet" href="/css/style.css" />
+    </head>
+    
+    <body>
+    	<!-- The whole thing must be wrapped inside one form tag. -->
+    	<form>
+    
+    		<% include="nav.html" %><!-- Includes the nav.html file to this location. -->
+    
+    		<p>GET PARAM 'text': [[ request.body.text ]]</p>
+    
+    		<input type="text" name="text" value="[[ request.body.text ]]"/>
+    		<input type="submit" value="Send!"/>
+    
+    		<h1>Button [[ button ]] pressed!</h1>
+    
+    		<input type="submit" name="btn1" p-click-server="handleClick()" value="button1"/>
+    
+    		<input type="submit" name="btn2" p-click-server="handleClick()" value="button2"/>
+    
+    		<input type="submit" name="btn3" p-click-server="handleClick()" value="button3"/>
+    
+    	</form>
+    
+    </body>
+    
     </html>
 
-Also you have to create your index.js with the next content.
+You have also to create your index.js with the next content.
 
     peruna.controller('mainController', function (scope) {
     	
     	scope.title = 'The page title';
-    	scope.vals = [];
-    	
-    	for (var i = 0; i < 10; i++) {
-    		scope.vals.push(i);
+
+    	scope.handleClick = function () {
+    		scope.button = this.value;
+    		console.log('The button clicked!');
     	}
-    
-    	scope.handleData = function (data) {
-    		console.log('got some GET data!');
-    	}
-    
-    	this.on('init', function () {
-    		// called on controller initialization
-    	});
-    
-    	this.on('data', function (data) {
-        // general function called on data receive
-    	});
-    
-    	this.on('get', function (data) {
-        // called always on GET data receive
-    	});
     
     });
     
