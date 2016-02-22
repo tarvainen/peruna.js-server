@@ -7,10 +7,10 @@ exports = module.exports = (function () {
 	Keksi.prototype.parse = function () {
 		return function (req, res, next) {
 			var cookies = {};
-			var cookieStr = req.headers.cookie;
+			var cookieStr = req.headers.cookie || '';
 			var cookieArray = cookieStr.split(';');
 
-			for (var i in cookieArray) {
+			for (var i = 0; i < cookieArray.length; i++) {
 				var parts = cookieArray[i].split('=');
 				cookies[parts[0]] = parts[1];
 			}
