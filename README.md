@@ -9,10 +9,9 @@ Download files to your project node_modules and require files in your server.js.
     var app = express();
     var urlParser = require('urlparser');
     
-    peruna.path('public/pages');
+    peruna.setViewPath('public/pages');
     peruna.setControllersPath('public/js/');
     
-    app.use('/views', express.static(__dirname + '/public/pages/'));
     app.use(urlParser.parse());
     app.use(peruna.render('/views'));
     
@@ -74,6 +73,22 @@ You have also to create your index.js with the next content.
     		scope.button = this.value;
     		console.log('The button clicked!');
     	}
-    
+    	
+    	this.on('init', function () {
+    	    console.log('peruna.js init');
+    	});
+    	
+    	this.on('get', function (data) {
+    	    console.log('got something GET data');
+    	});
+    	
+    	this.on('post', function (data) {
+    	    console.log('got something POST data');
+    	});
+    	
+    	this.on('data', function (data) {
+    	    console.log('got just something data');
+    	});
+    	
     });
     
