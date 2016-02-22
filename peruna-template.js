@@ -100,6 +100,7 @@ exports = module.exports = (function () {
 			that.initAllBlocks();
 			that.html = that.initAllBinds(that.html, that.opts);
 			controller.emit('ready');
+			that.removeAllTemplateBlocks();
 			that.removeNewlines();
 			callback();
 		});
@@ -314,6 +315,10 @@ exports = module.exports = (function () {
 
 	PerunaTemplate.prototype.removeNewlines = function () {
 		this.html = this.html.replace(/(^|)\n(\n)\2+/g, '');
+	}
+
+	PerunaTemplate.prototype.removeAllTemplateBlocks = function () {
+		this.html = this.html.replace(/<[\/%][\s%].*?(?=)>/g, '');
 	}
 
 	PerunaTemplate.prototype.escape = function (str) {
