@@ -1,0 +1,19 @@
+{
+  "name": "peruna.js-server",
+  "version": "1.0.1",
+  "description": "The first no-bullshit JS framework for server side!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tarvainen/peruna.js-server.git"
+  },
+  "author": "Atte Tarvainen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tarvainen/peruna.js-server/issues"
+  },
+  "homepage": "https://github.com/tarvainen/peruna.js-server#readme"
+}
