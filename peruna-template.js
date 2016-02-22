@@ -20,7 +20,9 @@ exports = module.exports = (function () {
 
 	PerunaTemplate.prototype.render = function (filename) {
 		var that = this;
-		var fp = Array(__dirname, that.__path, filename).join('/');
+		console.log(filename);
+		var fp = Array(that.__path, filename).join('/');
+		console.log(fp);
 		fs.readFile(fp, 'utf-8', function (err, data) {
 			if (err) {
 				console.log(err);
@@ -45,7 +47,7 @@ exports = module.exports = (function () {
 	PerunaTemplate.prototype.initControllers = function (callback) {
 		logger.log('Initializing controllers.');
 		var peruna = this;
-		var fp = Array(__dirname, this.controllersPath).join('/');
+		var fp = Array(this.controllersPath).join('/');
 
 		fs.readdir(fp, function (err, files) {
 			files = files || [];
@@ -165,7 +167,7 @@ exports = module.exports = (function () {
 
 	PerunaTemplate.prototype.includeFile = function (filename) {
 		filename = filename || '';
-		var fp = Array(__dirname, this.__path, filename).join('/');
+		var fp = Array(this.__path, filename).join('/');
 		try {
 			return fs.readFileSync(fp);
 		} catch (e) {

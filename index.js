@@ -3,7 +3,7 @@ var PerunaTemplate = require('./peruna-template.js');
 exports = module.exports = (function () {
 	
 	function Peruna () {
-		this.__path = '';
+
 	}
 
 	Peruna.prototype.setControllersPath = function (path) {
@@ -14,7 +14,7 @@ exports = module.exports = (function () {
 		this.__path = path || '';
 	}
 
-	Peruna.prototype.render = function (path) {
+	Peruna.prototype.render = function () {
 		var that = this;
 
 		return function (req, res, next) {

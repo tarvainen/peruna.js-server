@@ -5,7 +5,7 @@ The first no-bullshit JS framework for server side!
 Download files to your project node_modules and require files in your server.js. In your server.js file the content below.
 
     var express = require('express');
-    var peruna = require('peruna-server');
+    var peruna = require('peruna.js-server');
     var app = express();
     var urlParser = require('urlparser');
     
